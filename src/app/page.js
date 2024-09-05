@@ -1,9 +1,56 @@
-import { Button } from "@headlessui/react";
+"use client";
 
-export default function Example() {
+import { useState } from "react";
+import { toast } from "react-toastify";
+import Box from "@/components/Box";
+import Select from "@/components/Select";
+import Header from "@/components/Header";
+import { CITIES } from "@/constants";
+import { handleIconURL } from "@/utility";
+
+export default function Home() {
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(false);
+
+  const onChange = async (e) => {
+    try {
+      setLoading(true);
+      setData();
+      const res = await fetch("/api/weater", {
+        method: "POST",
+        body: JSON.stringify({ city: e.target.value }),
+      });
+      const { data } = await res.json();
+      setData(data);
+    } catch (error) {
+      toast.error(error || "an error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Button className="inline-flex items-center gap-2 rounded-md bg-gray-700 py-1.5 px-3 text-sm/6 font-semibold text-white shadow-inner shadow-white/10 focus:outline-none data-[hover]:bg-gray-600 data-[open]:bg-gray-700 data-[focus]:outline-1 data-[focus]:outline-white">
-      Save changes
-    </Button>
+    <>
+      <Header />
+      <Box>
+        <Select
+          label={"Select City"}
+          list={CITIES}
+          onChange={onChange}
+          disabled={loading}
+        />
+        {data && (
+          <Box>
+            <img src={handleIconURL(data?.weather?.[0].icon)} />
+            <div>
+              {data?.name} - {data?.sys?.country}
+            </div>
+            <div>{Math.round(data?.main?.temp - 273)}&deg; C</div>
+            <div>Description: {data?.weather?.[0].description}</div>
+            <div>Humidity: {data?.main?.humidity}%</div>
+          </Box>
+        )}
+      </Box>
+    </>
   );
 }

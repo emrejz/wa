@@ -10,23 +10,27 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    try {
+      event.preventDefault();
 
-    const formData = new FormData(event.target);
-    const username = formData.get("username");
-    const password = formData.get("password");
+      const formData = new FormData(event.target);
+      const username = formData.get("username");
+      const password = formData.get("password");
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-    });
-    const { success } = await res.json();
+      const res = await fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+      });
+      const { success } = await res.json();
 
-    if (success) {
-      router.push("/");
-      router.refresh();
-    } else {
-      toast.warn("Wrong username or password!");
+      if (success) {
+        router.push("/");
+        router.refresh();
+      } else {
+        toast.warn("Wrong username or password!");
+      }
+    } catch (error) {
+      toast.error(error || "an error occurred");
     }
   };
 
